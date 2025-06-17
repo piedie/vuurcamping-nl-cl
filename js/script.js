@@ -54,19 +54,46 @@ function initLeafletMap() {
 }
 
 function initGoogleMaps() {
-    if (typeof google === 'undefined') {
-        showMapFallback();
+    // Controleer of Google Maps al geladen is
+    if (typeof google !== 'undefined') {
+        createGoogleMap();
         return;
     }
+    
+    // Laad Google Maps script als het nog niet geladen is
+    console.log('🔄 Loading Google Maps as fallback...');
+    
+    // Gebruik de globale functie om Google Maps te laden
+    if (typeof window.loadGoogleMapsScript === 'function') {
+        // Override de callback om onze map te initialiseren
+        window.initMap = createGoogleMap;
+        window.loadGoogleMapsScript();
+    } else {
+        showMapFallback();
+    }
+}
+
+function createGoogleMap() {
     try {
         isLeafletMap = false;
         map = new google.maps.Map(document.getElementById('map'), {
             zoom: 7,
-            center: { lat: 52.2, lng: 5.5 }
+            center: { lat: 52.2, lng: 5.5 },
+            styles: [
+                {
+                    featureType: 'poi',
+                    elementType: 'labels',
+                    stylers: [{ visibility: 'off' }]
+                }
+            ],
+            mapTypeControl: false,
+            streetViewControl: false,
+            fullscreenControl: true
         });
         updateMarkers();
-        console.log('✅ Google Maps loaded');
+        console.log('✅ Google Maps loaded as fallback');
     } catch (error) {
+        console.error('Error creating Google Maps:', error);
         showMapFallback();
     }
 }

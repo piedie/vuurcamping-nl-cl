@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VuurCamping.nl - Vind campings waar vuur maken mag</title>
     <meta name="description" content="Vind campings in Nederland waar je een gezellig vuurtje mag maken. Met informatie over vuurkorven, kampvuren en hout beschikbaarheid.">
-    <link rel="stylesheet" href="style/style.css">
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
     <div class="header">
@@ -49,6 +49,11 @@
                     <option value="bepaalde-tijden">Hout op bepaalde tijden verkrijgbaar</option>
                     <option value="gratis">Gratis hout beschikbaar</option>
                     <option value="geen">Geen hout verkrijgbaar</option>
+                </select>
+                <select id="fireBanFilter" class="filter-select">
+                    <option value="">Alle campings</option>
+                    <option value="allow">Alleen vuur toegestaan</option>
+                    <option value="ban">Alleen stookverbod</option>
                 </select>
                 <button class="add-camping-btn" onclick="openModal()">+ Camping toevoegen</button>
             </div>

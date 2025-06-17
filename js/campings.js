@@ -133,7 +133,7 @@ const API = {
 // Export voor gebruik in andere bestanden
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = { campings, fireTypeNames, woodAvailabilityNames, API };
-}1504851149312-7a075b496cc7?w=400&h=200&fit=crop&auto=format',
+'https://images.unsplash.com/photo-1504851149312-7a075b496cc7?w=400&h=200&fit=crop&auto=format',
             'https://images.unsplash.com/photo-1587061949409-02df41d5e562?w=400&h=200&fit=crop&auto=format',
             'https://images.unsplash.com/photo-1534880606858-29b0e8a24e8d?w=400&h=200&fit=crop&auto=format',
             'https://images.unsplash.com/photo-1571896349842-33c89424de2d?w=400&h=200&fit=crop&auto=format'

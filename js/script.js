@@ -54,23 +54,9 @@ function initLeafletMap() {
 }
 
 function initGoogleMaps() {
-    // Controleer of Google Maps al geladen is
-    if (typeof google !== 'undefined') {
-        createGoogleMap();
-        return;
-    }
-    
-    // Laad Google Maps script als het nog niet geladen is
-    console.log('🔄 Loading Google Maps as fallback...');
-    
-    // Gebruik de globale functie om Google Maps te laden
-    if (typeof window.loadGoogleMapsScript === 'function') {
-        // Override de callback om onze map te initialiseren
-        window.initMap = createGoogleMap;
-        window.loadGoogleMapsScript();
-    } else {
-        showMapFallback();
-    }
+    console.log('🔄 Google Maps fallback disabled - API key removed for security');
+    console.log('📝 To enable Google Maps fallback: add your API key to the script');
+    showMapFallback();
 }
 
 function createGoogleMap() {

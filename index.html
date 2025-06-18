@@ -8,104 +8,32 @@
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <div class="header">
-        <h1>🔥 VuurCamping.nl</h1>
-        <p>Vind campings waar je een gezellig vuurtje mag maken</p>
-    </div>
-
-    <div class="container">
-        <div class="controls">
-            <div class="fire-ban-notice" id="fireBanNotice" style="display: none;">
-                <strong>⚠️ Stookverbod actief!</strong> In sommige regio's geldt momenteel een tijdelijk stookverbod. Check altijd de lokale regelgeving voordat je een vuur maakt.
+    <!-- Strakke header met navigatie -->
+    <header class="header">
+        <div class="header-container">
+            <div class="logo">
+                <h1>🔥 VuurCamping.nl</h1>
             </div>
-            
-            <div class="search-bar">
-                <input type="text" id="searchInput" class="search-input" placeholder="Zoek op naam of plaats...">
-                <select id="provinceFilter" class="filter-select">
-                    <option value="">Alle provincies</option>
-                    <option value="Noord-Holland">Noord-Holland</option>
-                    <option value="Zuid-Holland">Zuid-Holland</option>
-                    <option value="Utrecht">Utrecht</option>
-                    <option value="Gelderland">Gelderland</option>
-                    <option value="Noord-Brabant">Noord-Brabant</option>
-                    <option value="Limburg">Limburg</option>
-                    <option value="Zeeland">Zeeland</option>
-                    <option value="Overijssel">Overijssel</option>
-                    <option value="Flevoland">Flevoland</option>
-                    <option value="Drenthe">Drenthe</option>
-                    <option value="Friesland">Friesland</option>
-                    <option value="Groningen">Groningen</option>
-                </select>
-                <select id="featureFilter" class="filter-select">
-                    <option value="">Alle vuurmogelijkheden</option>
-                    <option value="vuur-bij-tent">Vuur(korf) bij je tent</option>
-                    <option value="centrale-vuurplaats">Centrale vuurplaats</option>
-                    <option value="dagelijks-vuur">Dagelijks vuur door campingeigenaar</option>
-                    <option value="overig">Overig</option>
-                </select>
-                <select id="woodFilter" class="filter-select">
-                    <option value="">Hout verkrijgbaar?</option>
-                    <option value="dag-nacht">Hout dag en nacht verkrijgbaar</option>
-                    <option value="bepaalde-tijden">Hout op bepaalde tijden verkrijgbaar</option>
-                    <option value="gratis">Gratis hout beschikbaar</option>
-                    <option value="geen">Geen hout verkrijgbaar</option>
-                </select>
-                <select id="fireBanFilter" class="filter-select">
-                    <option value="">Alle campings</option>
-                    <option value="allow">Alleen vuur toegestaan</option>
-                    <option value="ban">Alleen stookverbod</option>
-                </select>
-                <button class="add-camping-btn" onclick="openModal()">+ Camping toevoegen</button>
-            </div>
+            <nav class="navigation">
+                <a href="#" onclick="showPage('home')" class="nav-link active">Kaart</a>
+                <a href="#" onclick="showPage('about')" class="nav-link">Over deze site</a>
+                <a href="#" onclick="showPage('add')" class="nav-link">Camping toevoegen</a>
+                <a href="#" onclick="showPage('international')" class="nav-link">Buitenland</a>
+            </nav>
+            <button class="mobile-menu-btn" onclick="toggleMobileMenu()">☰</button>
         </div>
+    </header>
 
-        <div class="map-container">
-            <div id="map"></div>
-        </div>
-
-        <div class="stats">
-            <div class="stat-card">
-                <div class="stat-number" id="totalCampings">0</div>
-                <div class="stat-label">Campings</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number" id="totalProvinces">0</div>
-                <div class="stat-label">Provincies</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number">100%</div>
-                <div class="stat-label">Vuur toegestaan</div>
-            </div>
-        </div>
-
-        <div class="camping-list">
-            <h2>Gevonden campings</h2>
-            <div id="campingListContainer"></div>
-        </div>
-    </div>
-
-    <!-- Modal voor camping toevoegen -->
-    <div id="addCampingModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeModal()">&times;</span>
-            <h2>Camping toevoegen</h2>
-            <p>Voeg een camping toe waar vuur maken is toegestaan. Na goedkeuring wordt deze toegevoegd aan de kaart.</p>
-            
-            <form id="addCampingForm">
-                <div class="form-group">
-                    <label for="campingName">Naam van de camping *</label>
-                    <input type="text" id="campingName" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="campingAddress">Adres *</label>
-                    <input type="text" id="campingAddress" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="campingProvince">Provincie *</label>
-                    <select id="campingProvince" required>
-                        <option value="">Selecteer provincie</option>
+    <!-- Main content area -->
+    <main class="main-content">
+        <!-- Home page (kaart) -->
+        <div id="home-page" class="page active">
+            <!-- Compacte filter controls -->
+            <div class="filter-bar">
+                <div class="filter-container">
+                    <input type="text" id="searchInput" class="filter-input" placeholder="🔍 Zoek camping...">
+                    <select id="provinceFilter" class="filter-select">
+                        <option value="">📍 Provincie</option>
                         <option value="Noord-Holland">Noord-Holland</option>
                         <option value="Zuid-Holland">Zuid-Holland</option>
                         <option value="Utrecht">Utrecht</option>
@@ -119,56 +47,239 @@
                         <option value="Friesland">Friesland</option>
                         <option value="Groningen">Groningen</option>
                     </select>
-                </div>
-                
-                <div class="form-group">
-                    <label for="campingWebsite">Website (optioneel)</label>
-                    <input type="url" id="campingWebsite">
-                </div>
-                
-                <div class="form-group">
-                    <label for="campingPhone">Telefoonnummer (optioneel)</label>
-                    <input type="tel" id="campingPhone">
-                </div>
-                
-                <div class="form-group">
-                    <label for="campingFireType">Type vuurmogelijkheid *</label>
-                    <select id="campingFireType" required>
-                        <option value="">Selecteer vuurtype</option>
-                        <option value="vuur-bij-tent">Vuur(korf) bij je tent</option>
-                        <option value="centrale-vuurplaats">Centrale vuurplaats</option>
-                        <option value="dagelijks-vuur">Dagelijks vuur door campingeigenaar</option>
+                    <select id="featureFilter" class="filter-select">
+                        <option value="">🔥 Vuurtype</option>
+                        <option value="vuur-bij-tent">Bij tent</option>
+                        <option value="centrale-vuurplaats">Centraal</option>
+                        <option value="dagelijks-vuur">Dagelijks</option>
                         <option value="overig">Overig</option>
                     </select>
-                </div>
-                
-                <div class="form-group">
-                    <label for="campingWoodAvailability">Hout verkrijgbaar?</label>
-                    <select id="campingWoodAvailability">
-                        <option value="geen">Geen hout verkrijgbaar</option>
-                        <option value="bepaalde-tijden">Hout op bepaalde tijden verkrijgbaar</option>
-                        <option value="dag-nacht">Hout dag en nacht verkrijgbaar</option>
-                        <option value="gratis">Gratis hout beschikbaar</option>
+                    <select id="woodFilter" class="filter-select">
+                        <option value="">🪵 Hout</option>
+                        <option value="dag-nacht">24/7</option>
+                        <option value="bepaalde-tijden">Beperkt</option>
+                        <option value="gratis">Gratis</option>
+                        <option value="geen">Geen</option>
+                    </select>
+                    <select id="fireBanFilter" class="filter-select">
+                        <option value="">🚫 Verbod</option>
+                        <option value="allow">Vuur OK</option>
+                        <option value="ban">Verboden</option>
                     </select>
                 </div>
                 
-                <div class="form-group">
-                    <label for="campingNotes">Extra informatie</label>
-                    <textarea id="campingNotes" placeholder="Bijzonderheden over vuurregels, seizoenen, etc."></textarea>
+                <!-- Fire ban notice -->
+                <div class="fire-ban-notice" id="fireBanNotice" style="display: none;">
+                    <strong>⚠️ Stookverbod actief!</strong> Check lokale regelgeving voordat je een vuur maakt.
+                </div>
+            </div>
+
+            <!-- Map and sidebar layout -->
+            <div class="map-layout">
+                <!-- Grote kaart -->
+                <div class="map-container">
+                    <div id="map"></div>
+                </div>
+
+                <!-- Rechter sidebar voor camping info -->
+                <div class="sidebar" id="campingSidebar">
+                    <div class="sidebar-header">
+                        <h3>Camping informatie</h3>
+                        <button class="sidebar-close" onclick="closeSidebar()">×</button>
+                    </div>
+                    <div class="sidebar-content" id="sidebarContent">
+                        <div class="sidebar-placeholder">
+                            <div class="placeholder-icon">🏕️</div>
+                            <p>Klik op een camping icoon om details te zien</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Compacte statistieken -->
+            <div class="stats-bar">
+                <div class="stat-item">
+                    <span class="stat-number" id="totalCampings">0</span>
+                    <span class="stat-label">Campings</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number" id="totalProvinces">0</span>
+                    <span class="stat-label">Provincies</span>
+                </div>
+            </div>
+
+            <!-- Camping lijst (onder kaart) -->
+            <div class="camping-list">
+                <h2>Gevonden campings</h2>
+                <div id="campingListContainer"></div>
+            </div>
+        </div>
+
+        <!-- Over deze site pagina -->
+        <div id="about-page" class="page">
+            <div class="page-content">
+                <h1>Over VuurCamping.nl</h1>
+                <div class="content-section">
+                    <h2>🔥 Onze missie</h2>
+                    <p>VuurCamping.nl helpt kampeerders om campings te vinden waar je een gezellig vuurtje mag maken. Of je nu van een intieme vuurkorf bij je tent houdt of juist geniet van een grote centrale vuurplaats waar iedereen samen komt - wij helpen je de perfecte camping te vinden.</p>
                 </div>
                 
-                <button type="submit" class="submit-btn">Camping toevoegen voor goedkeuring</button>
-            </form>
-        </div>
-    </div>
+                <div class="content-section">
+                    <h2>🗺️ Hoe het werkt</h2>
+                    <p>Op onze interactieve kaart vind je campings verspreid over heel Nederland. Elke camping heeft duidelijke informatie over:</p>
+                    <ul>
+                        <li><strong>Type vuurmogelijkheid</strong> - Van vuurkorf bij je tent tot centrale kampvuren</li>
+                        <li><strong>Hout beschikbaarheid</strong> - Waar en wanneer je hout kunt krijgen</li>
+                        <li><strong>Actuele stookverboden</strong> - Real-time updates over tijdelijke verboden</li>
+                        <li><strong>Foto's en reviews</strong> - Zie hoe de camping eruitziet</li>
+                    </ul>
+                </div>
 
-    <footer style="text-align: center; padding: 2rem; color: #6b6b6b; font-size: 0.9rem;">
+                <div class="content-section">
+                    <h2>🏕️ Voor campingeigenaren</h2>
+                    <p>Ben je eigenaar van een camping waar vuur maken mag? Voeg je camping gratis toe aan onze kaart! Na een snelle controle wordt je camping zichtbaar voor duizenden kampeerders die op zoek zijn naar de perfecte plek voor een vuurtje.</p>
+                </div>
+
+                <div class="content-section">
+                    <h2>⚠️ Stookverboden</h2>
+                    <p>Tijdens droge periodes kunnen er tijdelijke stookverboden gelden. Onze site toont automatisch welke campings momenteel een stookverbod hebben. Check altijd de lokale regelgeving en respecteer de natuur.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Camping toevoegen pagina -->
+        <div id="add-page" class="page">
+            <div class="page-content">
+                <h1>Camping toevoegen</h1>
+                <div class="content-section">
+                    <p>Voeg jouw camping toe waar vuur maken is toegestaan. Na goedkeuring wordt deze zichtbaar op de kaart.</p>
+                    
+                    <form id="addCampingForm" class="camping-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="campingName">Naam van de camping *</label>
+                                <input type="text" id="campingName" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="campingProvince">Provincie *</label>
+                                <select id="campingProvince" required>
+                                    <option value="">Selecteer provincie</option>
+                                    <option value="Noord-Holland">Noord-Holland</option>
+                                    <option value="Zuid-Holland">Zuid-Holland</option>
+                                    <option value="Utrecht">Utrecht</option>
+                                    <option value="Gelderland">Gelderland</option>
+                                    <option value="Noord-Brabant">Noord-Brabant</option>
+                                    <option value="Limburg">Limburg</option>
+                                    <option value="Zeeland">Zeeland</option>
+                                    <option value="Overijssel">Overijssel</option>
+                                    <option value="Flevoland">Flevoland</option>
+                                    <option value="Drenthe">Drenthe</option>
+                                    <option value="Friesland">Friesland</option>
+                                    <option value="Groningen">Groningen</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="campingAddress">Volledig adres *</label>
+                            <input type="text" id="campingAddress" required>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="campingWebsite">Website</label>
+                                <input type="url" id="campingWebsite">
+                            </div>
+                            <div class="form-group">
+                                <label for="campingPhone">Telefoonnummer</label>
+                                <input type="tel" id="campingPhone">
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="campingFireType">Type vuurmogelijkheid *</label>
+                                <select id="campingFireType" required>
+                                    <option value="">Selecteer vuurtype</option>
+                                    <option value="vuur-bij-tent">Vuur(korf) bij je tent</option>
+                                    <option value="centrale-vuurplaats">Centrale vuurplaats</option>
+                                    <option value="dagelijks-vuur">Dagelijks vuur door campingeigenaar</option>
+                                    <option value="overig">Overig</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="campingWoodAvailability">Hout verkrijgbaar?</label>
+                                <select id="campingWoodAvailability">
+                                    <option value="geen">Geen hout verkrijgbaar</option>
+                                    <option value="bepaalde-tijden">Hout op bepaalde tijden</option>
+                                    <option value="dag-nacht">Hout dag en nacht</option>
+                                    <option value="gratis">Gratis hout beschikbaar</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="campingNotes">Extra informatie</label>
+                            <textarea id="campingNotes" placeholder="Bijzonderheden over vuurregels, openingstijden, seizoenen, etc."></textarea>
+                        </div>
+                        
+                        <button type="submit" class="submit-btn">Camping toevoegen voor goedkeuring</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Buitenland pagina -->
+        <div id="international-page" class="page">
+            <div class="page-content">
+                <h1>Vuurcampings in het buitenland</h1>
+                <div class="content-section">
+                    <h2>🌍 Binnenkort beschikbaar!</h2>
+                    <p>We zijn hard bezig om onze service uit te breiden naar de buurlanden. Binnenkort vind je hier campings waar vuur maken mag in:</p>
+                    
+                    <div class="country-list">
+                        <div class="country-item">
+                            <h3>🇧🇪 België</h3>
+                            <p>Ardennen, kust en natuurgebieden</p>
+                            <span class="status coming-soon">Binnenkort</span>
+                        </div>
+                        <div class="country-item">
+                            <h3>🇩🇪 Duitsland</h3>
+                            <p>Zwarte Woud, Beieren en Noord-Duitsland</p>
+                            <span class="status coming-soon">Binnenkort</span>
+                        </div>
+                        <div class="country-item">
+                            <h3>🇫🇷 Frankrijk</h3>
+                            <p>Normandië, Bretagne en Lotgebied</p>
+                            <span class="status planning">In planning</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-section">
+                    <h2>📧 Op de hoogte blijven?</h2>
+                    <p>Wil je als eerste weten wanneer we campings in het buitenland toevoegen? Laat je e-mailadres achter!</p>
+                    
+                    <form class="newsletter-form">
+                        <div class="form-group">
+                            <input type="email" placeholder="je@email.nl" required>
+                            <button type="submit">Aanmelden</button>
+                        </div>
+                        <p class="form-note">We sturen maximaal 1 mail per maand en delen je gegevens nooit.</p>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer style="text-align: center; padding: 2rem; color: #6b6b6b; font-size: 0.9rem; background: white; margin-top: 2rem;">
         <p>&copy; 2024 VuurCamping.nl - Voor alle kampeerders die van een gezellig vuurtje houden</p>
     </footer>
 
     <script src="js/campings.js"></script>
     <script src="js/script.js"></script>
     
-  
+    <!-- Google Maps wordt alleen dynamisch geladen als OpenStreetMap faalt -->
+    <!-- Geen API key meer in de HTML! -->
 </body>
 </html>

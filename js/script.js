@@ -1,9 +1,10 @@
-// VuurCamping.nl - OpenStreetMap + Google Maps fallback
+// VuurCamping.nl - Upgraded JavaScript with sidebar, routing, and sharing
 let map;
 let markers = [];
 let filteredCampings = [...campings];
 let currentSliders = {};
 let isLeafletMap = false;
+let currentCampingId = null;
 
 // Initialize application
 document.addEventListener('DOMContentLoaded', function() {
@@ -11,8 +12,126 @@ document.addEventListener('DOMContentLoaded', function() {
     updateCampingList();
     checkFireBans();
     initEventListeners();
+    initRouting();
     initOpenStreetMap();
 });
+
+// Simple routing system
+function initRouting() {
+    // Handle initial URL
+    handleRoute();
+    
+    // Handle browser back/forward
+    window.addEventListener('popstate', handleRoute);
+}
+
+function handleRoute() {
+    const path = window.location.pathname;
+    const searchParams = new URLSearchParams(window.location.search);
+    
+    // Handle camping detail URLs like /camping/camping-de-wildhoeve
+    if (path.startsWith('/camping/')) {
+        const campingSlug = path.replace('/camping/', '');
+        const camping = findCampingBySlug(campingSlug);
+        if (camping) {
+            showCampingInSidebar(camping.id);
+            return;
+        }
+    }
+    
+    // Handle page navigation
+    if (path === '/' || path === '/index.html' || path === '') {
+        showPage('home');
+    } else if (path === '/over-deze-site' || searchParams.get('page') === 'about') {
+        showPage('about');
+    } else if (path === '/camping-toevoegen' || searchParams.get('page') === 'add') {
+        showPage('add');
+    } else if (path === '/buitenland' || searchParams.get('page') === 'international') {
+        showPage('international');
+    }
+}
+
+function findCampingBySlug(slug) {
+    return campings.find(camping => 
+        createSlug(camping.name) === slug
+    );
+}
+
+function createSlug(name) {
+    return name
+        .toLowerCase()
+        .replace(/[^\w\s-]/g, '') // Remove special characters
+        .replace(/\s+/g, '-') // Replace spaces with hyphens
+        .replace(/--+/g, '-') // Replace multiple hyphens with single
+        .trim('-'); // Remove leading/trailing hyphens
+}
+
+function updateURL(campingId = null, page = null) {
+    let newPath = '/';
+    
+    if (campingId) {
+        const camping = campings.find(c => c.id === campingId);
+        if (camping) {
+            newPath = `/camping/${createSlug(camping.name)}`;
+        }
+    } else if (page && page !== 'home') {
+        const pageUrls = {
+            'about': '/over-deze-site',
+            'add': '/camping-toevoegen',
+            'international': '/buitenland'
+        };
+        newPath = pageUrls[page] || '/';
+    }
+    
+    // Use replaceState instead of pushState for camping details to avoid cluttering history
+    const method = campingId ? 'replaceState' : 'pushState';
+    window.history[method]({}, '', newPath);
+}
+
+// Page navigation
+function showPage(pageId) {
+    // Hide all pages
+    document.querySelectorAll('.page').forEach(page => {
+        page.classList.remove('active');
+    });
+    
+    // Show selected page
+    document.getElementById(`${pageId}-page`).classList.add('active');
+    
+    // Update navigation
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.classList.remove('active');
+    });
+    document.querySelector(`[onclick="showPage('${pageId}')"]`).classList.add('active');
+    
+    // Close sidebar when changing pages
+    if (pageId !== 'home') {
+        closeSidebar();
+    }
+    
+    // Close mobile menu
+    closeMobileMenu();
+    
+    // Update URL
+    updateURL(null, pageId);
+}
+
+// Mobile menu
+function toggleMobileMenu() {
+    const nav = document.querySelector('.navigation');
+    const overlay = document.getElementById('mobileMenuOverlay');
+    
+    nav.classList.toggle('open');
+    overlay.classList.toggle('show');
+}
+
+function closeMobileMenu() {
+    const nav = document.querySelector('.navigation');
+    const overlay = document.getElementById('mobileMenuOverlay');
+    
+    nav.classList.remove('open');
+    overlay.classList.remove('show');
+}
 
 // Initialize OpenStreetMap
 function initOpenStreetMap() {
@@ -59,31 +178,6 @@ function initGoogleMaps() {
     showMapFallback();
 }
 
-function createGoogleMap() {
-    try {
-        isLeafletMap = false;
-        map = new google.maps.Map(document.getElementById('map'), {
-            zoom: 7,
-            center: { lat: 52.2, lng: 5.5 },
-            styles: [
-                {
-                    featureType: 'poi',
-                    elementType: 'labels',
-                    stylers: [{ visibility: 'off' }]
-                }
-            ],
-            mapTypeControl: false,
-            streetViewControl: false,
-            fullscreenControl: true
-        });
-        updateMarkers();
-        console.log('✅ Google Maps loaded as fallback');
-    } catch (error) {
-        console.error('Error creating Google Maps:', error);
-        showMapFallback();
-    }
-}
-
 function updateMarkers() {
     if (isLeafletMap) {
         updateLeafletMarkers();
@@ -105,8 +199,12 @@ function updateLeafletMarkers() {
         });
         
         const marker = L.marker([camping.lat, camping.lng], { icon }).addTo(map);
-        marker.bindPopup(createPopupContent(camping), { maxWidth: 400, minWidth: 350 });
-        marker.on('popupopen', () => setTimeout(() => initSlider(camping.id), 200));
+        
+        // Click handler to open sidebar instead of popup
+        marker.on('click', () => {
+            showCampingInSidebar(camping.id);
+        });
+        
         markers.push(marker);
     });
 }
@@ -129,81 +227,136 @@ function updateGoogleMarkers() {
             }
         });
         
-        const infoWindow = new google.maps.InfoWindow({
-            content: createPopupContent(camping),
-            maxWidth: 400
-        });
-        
         marker.addListener('click', () => {
-            markers.forEach(m => m.infoWindow && m.infoWindow.close());
-            infoWindow.open(map, marker);
-            setTimeout(() => initSlider(camping.id), 200);
+            showCampingInSidebar(camping.id);
         });
         
-        marker.infoWindow = infoWindow;
         markers.push(marker);
     });
 }
 
-function createPopupContent(camping) {
+// Sidebar functionality
+function showCampingInSidebar(campingId) {
+    const camping = campings.find(c => c.id === campingId);
+    if (!camping) return;
+    
+    currentCampingId = campingId;
+    const sidebar = document.getElementById('campingSidebar');
+    const content = document.getElementById('sidebarContent');
+    
+    // Create sidebar content
+    content.innerHTML = createSidebarContent(camping);
+    
+    // Show sidebar
+    sidebar.classList.add('open');
+    
+    // Initialize photo slider
+    if (camping.photos && camping.photos.length > 0) {
+        initSlider(campingId);
+    }
+    
+    // Update URL
+    updateURL(campingId);
+    
+    // Focus on camping on map
+    focusOnCampingOnMap(camping);
+}
+
+function createSidebarContent(camping) {
     const photosHtml = camping.photos ? camping.photos.map((photo, index) => 
-        `<div class="photo-slide ${index === 0 ? 'active' : ''}" style="background-image: url('${photo}'); position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-size: cover; background-position: center; opacity: ${index === 0 ? '1' : '0'}; transition: opacity 0.3s ease;"></div>`
+        `<div class="photo-slide ${index === 0 ? 'active' : ''}" style="background-image: url('${photo}');"></div>`
     ).join('') : '';
 
-    const dotsHtml = camping.photos ? camping.photos.map((_, index) => 
-        `<div class="slider-dot ${index === 0 ? 'active' : ''}" onclick="goToSlide(${camping.id}, ${index})" style="width: 8px; height: 8px; border-radius: 50%; background: ${index === 0 ? 'white' : 'rgba(255,255,255,0.5)'}; cursor: pointer; margin: 0 2px;"></div>`
+    const dotsHtml = camping.photos && camping.photos.length > 1 ? camping.photos.map((_, index) => 
+        `<div class="slider-dot ${index === 0 ? 'active' : ''}" onclick="goToSlide(${camping.id}, ${index})"></div>`
     ).join('') : '';
 
     return `
-        <div style="max-width: 380px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
-            <div style="background: ${camping.fireBan ? '#dc3545' : '#d2691e'}; color: white; padding: 1.2rem; text-align: center; border-radius: 8px 8px 0 0;">
-                <div style="width: 45px; height: 45px; background: white; border-radius: 50%; margin: 0 auto 0.7rem; display: flex; align-items: center; justify-content: center; font-size: 26px;">
-                    ${camping.fireBan ? '🚫' : '🔥'}
-                </div>
-                <h3 style="margin: 0; font-size: 1.2rem; font-weight: 600;">${camping.name}</h3>
-                ${camping.fireBan ? '<div style="margin-top: 0.5rem; font-weight: 600; font-size: 0.95rem;">⚠️ STOOKVERBOD ACTIEF!</div>' : ''}
+        <div class="camping-header">
+            <h2 class="camping-title">${camping.name}</h2>
+            <div class="camping-address">📍 ${camping.address}</div>
+            <div class="camping-rating">⭐ ${camping.rating}/5</div>
+        </div>
+        
+        ${camping.fireBan ? `
+            <div class="fire-ban-warning">
+                🚫 STOOKVERBOD ACTIEF!
+                <div style="font-size: 0.9rem; margin-top: 0.5rem;">Check lokale regelgeving</div>
             </div>
-            <div style="padding: 1.2rem; background: white; line-height: 1.5;">
-                <div style="margin-bottom: 0.6rem; color: #6b6b6b; font-size: 0.95rem;">📍 ${camping.address}</div>
-                <div style="margin-bottom: 0.6rem; color: #6b6b6b; font-size: 0.95rem;">📞 ${camping.phone}</div>
-                <div style="margin-bottom: 0.6rem; color: #6b6b6b; font-size: 0.95rem;">🌐 <a href="http://${camping.website}" target="_blank" style="color: #d2691e; text-decoration: none;">${camping.website}</a></div>
-                <div style="margin-bottom: 0.8rem; color: #6b6b6b; font-size: 0.95rem;">⭐ ${camping.rating}/5</div>
-                
-                <div style="margin: 1rem 0;">
-                    <span style="background: ${camping.fireBan ? '#dc3545' : '#d2691e'}; color: white; padding: 0.4rem 0.8rem; border-radius: 16px; font-size: 0.85rem; margin-right: 0.5rem; display: inline-block; margin-bottom: 0.3rem;">
-                        🔥 ${fireTypeNames[camping.fireType]}
-                    </span>
-                    <span style="background: #6c757d; color: white; padding: 0.4rem 0.8rem; border-radius: 16px; font-size: 0.85rem; display: inline-block; margin-bottom: 0.3rem;">
-                        ${woodAvailabilityNames[camping.woodAvailability]}
-                    </span>
+        ` : ''}
+        
+        <div class="camping-info-grid">
+            <div class="info-item">
+                <div class="info-label">📞 Telefoon</div>
+                <div class="info-value">${camping.phone}</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">🌐 Website</div>
+                <div class="info-value">
+                    <a href="http://${camping.website}" target="_blank" style="color: #d2691e; text-decoration: none;">
+                        ${camping.website}
+                    </a>
                 </div>
-                
-                <div style="font-size: 0.95rem; color: #6b6b6b; margin-bottom: 1.2rem; line-height: 1.4;">
-                    ${camping.description}
-                </div>
-                
-                ${camping.photos && camping.photos.length > 0 ? `
-                <div style="position: relative; height: 140px; background: #f8f9fa; border-radius: 8px; overflow: hidden; margin-bottom: 1rem;" id="slider-${camping.id}">
+            </div>
+        </div>
+        
+        <div class="feature-tags">
+            <span class="feature-tag ${camping.fireBan ? 'fire-ban' : ''}">
+                🔥 ${fireTypeNames[camping.fireType]}
+            </span>
+            <span class="feature-tag">
+                ${woodAvailabilityNames[camping.woodAvailability]}
+            </span>
+        </div>
+        
+        <div class="camping-description">
+            ${camping.description}
+        </div>
+        
+        ${camping.photos && camping.photos.length > 0 ? `
+            <div class="photo-gallery">
+                <div class="photo-slider" id="slider-${camping.id}">
                     ${photosHtml}
                     ${camping.photos.length > 1 ? `
-                        <button onclick="prevSlide(${camping.id})" style="position: absolute; left: 8px; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.6); color: white; border: none; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center;">‹</button>
-                        <button onclick="nextSlide(${camping.id})" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.6); color: white; border: none; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center;">›</button>
-                        <div style="position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); display: flex; gap: 4px;">${dotsHtml}</div>
+                        <button class="slider-nav prev" onclick="prevSlide(${camping.id})">‹</button>
+                        <button class="slider-nav next" onclick="nextSlide(${camping.id})">›</button>
                     ` : ''}
                 </div>
+                ${camping.photos.length > 1 ? `
+                    <div class="slider-dots">${dotsHtml}</div>
                 ` : ''}
-                
-                <div style="text-align: center;">
-                    <button onclick="getDirections(${camping.lat}, ${camping.lng}, '${camping.name}')" 
-                            style="background: #28a745; color: white; border: none; padding: 0.6rem 1.2rem; border-radius: 6px; cursor: pointer; font-size: 0.9rem; font-weight: 500;">
-                        🗺️ Route berekenen
-                    </button>
-                </div>
             </div>
+        ` : ''}
+        
+        <div class="action-buttons">
+            <button class="action-btn primary" onclick="focusOnCampingOnMap(${JSON.stringify(camping).replace(/"/g, '&quot;')})">
+                📍 Centreer op kaart
+            </button>
+            <button class="action-btn secondary" onclick="getDirections(${camping.lat}, ${camping.lng}, '${camping.name}')">
+                🗺️ Route berekenen
+            </button>
+            <a href="http://${camping.website}" target="_blank" class="action-btn tertiary">
+                🌐 Bezoek website
+            </a>
+            <button class="action-btn share" onclick="shareCamping(${camping.id})">
+                📤 Deel camping
+            </button>
         </div>
     `;
 }
 
+function closeSidebar() {
+    const sidebar = document.getElementById('campingSidebar');
+    sidebar.classList.remove('open');
+    currentCampingId = null;
+    
+    // Update URL to remove camping detail
+    if (window.location.pathname.startsWith('/camping/')) {
+        updateURL();
+    }
+}
+
+// Photo slider functions
 function initSlider(campingId) { 
     currentSliders[campingId] = 0; 
 }
@@ -230,17 +383,77 @@ function goToSlide(campingId, index) {
 function updateSlider(campingId) {
     const slider = document.getElementById(`slider-${campingId}`);
     if (!slider) return;
+    
     slider.querySelectorAll('.photo-slide').forEach((slide, index) => {
-        slide.style.opacity = index === currentSliders[campingId] ? '1' : '0';
+        slide.classList.toggle('active', index === currentSliders[campingId]);
     });
-    slider.querySelectorAll('.slider-dot').forEach((dot, index) => {
-        dot.style.background = index === currentSliders[campingId] ? 'white' : 'rgba(255,255,255,0.5)';
+    
+    slider.parentElement.querySelectorAll('.slider-dot').forEach((dot, index) => {
+        dot.classList.toggle('active', index === currentSliders[campingId]);
     });
+}
+
+// Map interaction
+function focusOnCampingOnMap(camping) {
+    if (!map) return;
+
+    if (isLeafletMap) {
+        map.setView([camping.lat, camping.lng], 12);
+    } else {
+        map.setCenter({ lat: camping.lat, lng: camping.lng });
+        map.setZoom(12);
+    }
 }
 
 function getDirections(lat, lng, name) {
     const url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&destination_place_id=${encodeURIComponent(name)}`;
     window.open(url, '_blank');
+}
+
+// Share functionality
+function shareCamping(campingId) {
+    const camping = campings.find(c => c.id === campingId);
+    if (!camping) return;
+    
+    const shareData = {
+        title: `${camping.name} - VuurCamping.nl`,
+        text: `Check deze camping uit waar je vuur mag maken: ${camping.name} in ${camping.city}`,
+        url: `${window.location.origin}/camping/${createSlug(camping.name)}`
+    };
+    
+    // Try native sharing first (mobile)
+    if (navigator.share) {
+        navigator.share(shareData).catch(console.error);
+    } else {
+        // Fallback: copy to clipboard
+        navigator.clipboard.writeText(shareData.url).then(() => {
+            showShareNotification('Link gekopieerd naar klembord!');
+        }).catch(() => {
+            // Ultimate fallback: show URL in alert
+            prompt('Kopieer deze link:', shareData.url);
+        });
+    }
+}
+
+function showShareNotification(message) {
+    // Remove existing notification
+    const existing = document.querySelector('.share-notification');
+    if (existing) existing.remove();
+    
+    // Create notification
+    const notification = document.createElement('div');
+    notification.className = 'share-notification';
+    notification.textContent = message;
+    document.body.appendChild(notification);
+    
+    // Show notification
+    setTimeout(() => notification.classList.add('show'), 100);
+    
+    // Hide after 3 seconds
+    setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => notification.remove(), 300);
+    }, 3000);
 }
 
 function showMapFallback() {
@@ -272,6 +485,8 @@ function updateCampingList() {
     filteredCampings.forEach(camping => {
         const card = document.createElement('div');
         card.className = `camping-card ${camping.fireBan ? 'banned' : ''}`;
+        card.onclick = () => showCampingInSidebar(camping.id);
+        
         card.innerHTML = `
             <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
                 <h3 style="color: #2c2c2c; font-weight: 600; margin: 0;">${camping.fireBan ? '🚫' : '🔥'} ${camping.name}</h3>
@@ -286,38 +501,13 @@ function updateCampingList() {
             </div>
             <div style="font-size: 0.9rem; color: #6b6b6b; margin-bottom: 1rem;">${camping.description}</div>
             <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                <button onclick="focusOnCamping(${camping.id})" style="background: #d2691e; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; font-size: 0.9rem;">📍 Toon op kaart</button>
-                <button onclick="getDirections(${camping.lat}, ${camping.lng}, '${camping.name}')" style="background: #28a745; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; font-size: 0.9rem;">🗺️ Route</button>
-                <a href="http://${camping.website}" target="_blank" style="background: #6c757d; color: white; text-decoration: none; padding: 0.5rem 1rem; border-radius: 4px; font-size: 0.9rem;">🌐 Website</a>
+                <button onclick="event.stopPropagation(); showCampingInSidebar(${camping.id})" style="background: #d2691e; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; font-size: 0.9rem;">📍 Bekijk details</button>
+                <button onclick="event.stopPropagation(); getDirections(${camping.lat}, ${camping.lng}, '${camping.name}')" style="background: #28a745; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; font-size: 0.9rem;">🗺️ Route</button>
+                <a href="http://${camping.website}" target="_blank" onclick="event.stopPropagation()" style="background: #6c757d; color: white; text-decoration: none; padding: 0.5rem 1rem; border-radius: 4px; font-size: 0.9rem;">🌐 Website</a>
+                <button onclick="event.stopPropagation(); shareCamping(${camping.id})" style="background: #007bff; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; font-size: 0.9rem;">📤 Deel</button>
             </div>
         `;
         container.appendChild(card);
-    });
-}
-
-function focusOnCamping(campingId) {
-    const camping = campings.find(c => c.id === campingId);
-    if (!camping || !map) return;
-
-    if (isLeafletMap) {
-        map.setView([camping.lat, camping.lng], 12);
-        const marker = markers.find(m => m.getLatLng && 
-            m.getLatLng().lat === camping.lat && m.getLatLng().lng === camping.lng);
-        if (marker) {
-            marker.openPopup();
-        }
-    } else {
-        map.setCenter({ lat: camping.lat, lng: camping.lng });
-        map.setZoom(12);
-        const marker = markers.find(m => m.getTitle && m.getTitle() === camping.name);
-        if (marker) {
-            google.maps.event.trigger(marker, 'click');
-        }
-    }
-    
-    document.querySelector('.map-container').scrollIntoView({ 
-        behavior: 'smooth',
-        block: 'center'
     });
 }
 
@@ -353,6 +543,11 @@ function filterCampings() {
     updateMarkers();
     updateStats();
     updateCampingList();
+    
+    // Close sidebar if current camping is filtered out
+    if (currentCampingId && !filteredCampings.find(c => c.id === currentCampingId)) {
+        closeSidebar();
+    }
 }
 
 function updateStats() {
@@ -361,39 +556,78 @@ function updateStats() {
     document.getElementById('totalProvinces').textContent = provinces.size;
 }
 
-function openModal() {
-    document.getElementById('addCampingModal').style.display = 'block';
-}
-
-function closeModal() {
-    document.getElementById('addCampingModal').style.display = 'none';
-}
-
 function initEventListeners() {
+    // Filter event listeners
     document.getElementById('searchInput').addEventListener('input', filterCampings);
     document.getElementById('provinceFilter').addEventListener('change', filterCampings);
     document.getElementById('featureFilter').addEventListener('change', filterCampings);
     document.getElementById('woodFilter').addEventListener('change', filterCampings);
     document.getElementById('fireBanFilter').addEventListener('change', filterCampings);
 
-    window.onclick = function(event) {
-        const modal = document.getElementById('addCampingModal');
-        if (event.target === modal) closeModal();
-    };
-
-    document.getElementById('addCampingForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        alert('Bedankt! Je camping is toegevoegd voor goedkeuring.');
-        closeModal();
+    // Form submission
+    const addCampingForm = document.getElementById('addCampingForm');
+    if (addCampingForm) {
+        addCampingForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('Bedankt! Je camping is toegevoegd voor goedkeuring.');
+            // Reset form
+            this.reset();
+        });
+    }
+    
+    // Newsletter form
+    const newsletterForms = document.querySelectorAll('.newsletter-form');
+    newsletterForms.forEach(form => {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const email = this.querySelector('input[type="email"]').value;
+            if (email) {
+                alert('Bedankt! We houden je op de hoogte van nieuwe ontwikkelingen.');
+                this.reset();
+            }
+        });
+    });
+    
+    // Close sidebar when clicking outside on desktop
+    document.addEventListener('click', function(e) {
+        const sidebar = document.getElementById('campingSidebar');
+        const isClickInsideSidebar = sidebar.contains(e.target);
+        const isClickOnMarker = e.target.closest('.leaflet-marker-icon') || e.target.closest('[onclick*="showCampingInSidebar"]');
+        
+        if (!isClickInsideSidebar && !isClickOnMarker && sidebar.classList.contains('open')) {
+            // Only close on desktop, not mobile
+            if (window.innerWidth >= 768) {
+                closeSidebar();
+            }
+        }
+    });
+    
+    // Keyboard navigation
+    document.addEventListener('keydown', function(e) {
+        // Escape key closes sidebar
+        if (e.key === 'Escape' && currentCampingId) {
+            closeSidebar();
+        }
+        
+        // Arrow keys for photo navigation
+        if (currentCampingId && document.getElementById('campingSidebar').classList.contains('open')) {
+            if (e.key === 'ArrowLeft') {
+                prevSlide(currentCampingId);
+            } else if (e.key === 'ArrowRight') {
+                nextSlide(currentCampingId);
+            }
+        }
     });
 }
 
-// Global functions
+// Global functions for onclick handlers
+window.showPage = showPage;
+window.toggleMobileMenu = toggleMobileMenu;
+window.showCampingInSidebar = showCampingInSidebar;
+window.closeSidebar = closeSidebar;
 window.nextSlide = nextSlide;
 window.prevSlide = prevSlide;
 window.goToSlide = goToSlide;
-window.openModal = openModal;
-window.closeModal = closeModal;
 window.getDirections = getDirections;
-window.focusOnCamping = focusOnCamping;
-window.initMap = function() { console.log('Google Maps callback ready'); };
+window.shareCamping = shareCamping;
+window.focusOnCampingOnMap = focusOnCampingOnMap;

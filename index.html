@@ -61,11 +61,102 @@
                         <option value="gratis">Gratis</option>
                         <option value="geen">Geen</option>
                     </select>
-                    <select id="fireBanFilter" class="filter-select">
-                        <option value="">🚫 Verbod</option>
-                        <option value="allow">Vuur OK</option>
-                        <option value="ban">Verboden</option>
-                    </select>
+                    <button class="filter-toggle-btn" onclick="toggleAdvancedFilters()">
+                        ⚙️ Meer filters
+                    </button>
+                </div>
+                
+                <!-- Advanced filters panel -->
+                <div class="advanced-filters" id="advancedFilters">
+                    <div class="filter-section">
+                        <h4>🐕 Huisdieren</h4>
+                        <div class="checkbox-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" value="huisdieren-welkom" onchange="filterCampings()">
+                                <span class="checkbox-text">Huisdieren welkom</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" value="geen-huisdieren" onchange="filterCampings()">
+                                <span class="checkbox-text">Geen huisdieren</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="filter-section">
+                        <h4>👨‍👩‍👧‍👦 Kinderen</h4>
+                        <div class="checkbox-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" value="kindvriendelijk" onchange="filterCampings()">
+                                <span class="checkbox-text">Kindvriendelijk</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" value="geen-kinderen" onchange="filterCampings()">
+                                <span class="checkbox-text">Geen kinderen</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="filter-section">
+                        <h4>⚡ Stroom</h4>
+                        <div class="checkbox-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" value="met-stroom" onchange="filterCampings()">
+                                <span class="checkbox-text">Plekken met stroom</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" value="zonder-stroom" onchange="filterCampings()">
+                                <span class="checkbox-text">Plekken zonder stroom</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="filter-section">
+                        <h4>🏞️ Locatie type</h4>
+                        <div class="checkbox-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" value="natuurgebied" onchange="filterCampings()">
+                                <span class="checkbox-text">In natuurgebied</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" value="nabij-stad" onchange="filterCampings()">
+                                <span class="checkbox-text">Nabij stad</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="filter-section">
+                        <h4>🏕️ Grootte</h4>
+                        <div class="checkbox-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" value="klein" onchange="filterCampings()">
+                                <span class="checkbox-text">Minder dan 25 plaatsen</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" value="middel" onchange="filterCampings()">
+                                <span class="checkbox-text">25-50 plaatsen</span>
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" value="groot" onchange="filterCampings()">
+                                <span class="checkbox-text">Meer dan 50 plaatsen</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="filter-section">
+                        <h4>🥖 Extra voorzieningen</h4>
+                        <div class="checkbox-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" value="broodjes" onchange="filterCampings()">
+                                <span class="checkbox-text">Broodjes verkrijgbaar</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="filter-actions">
+                        <button class="clear-filters-btn" onclick="clearAllFilters()">
+                            🗑️ Wis alle filters
+                        </button>
+                    </div>
                 </div>
                 
                 <!-- Fire ban notice -->

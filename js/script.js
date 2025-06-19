@@ -1,13 +1,15 @@
-// VuurCamping.nl - Upgraded JavaScript with sidebar, routing, and sharing
+// VuurCamping.nl - Upgraded JavaScript with sidebar, routing, sharing, and lazy loading
 let map;
 let markers = [];
 let filteredCampings = [...campings];
 let currentSliders = {};
 let isLeafletMap = false;
 let currentCampingId = null;
+let lazyImageObserver = null;
 
 // Initialize application
 document.addEventListener('DOMContentLoaded', function() {
+    initLazyLoading();
     updateStats();
     updateCampingList();
     checkFireBans();
@@ -15,6 +17,48 @@ document.addEventListener('DOMContentLoaded', function() {
     initRouting();
     initOpenStreetMap();
 });
+
+// Lazy loading implementation
+function initLazyLoading() {
+    if ('IntersectionObserver' in window) {
+        lazyImageObserver = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const img = entry.target;
+                    const actualSrc = img.dataset.src;
+                    
+                    if (actualSrc) {
+                        // Create a new image to preload
+                        const newImg = new Image();
+                        newImg.onload = () => {
+                            // Once loaded, set the actual src and fade in
+                            img.src = actualSrc;
+                            img.classList.add('loaded');
+                            img.removeAttribute('data-src');
+                        };
+                        newImg.onerror = () => {
+                            // If loading fails, show placeholder
+                            img.classList.add('error');
+                        };
+                        newImg.src = actualSrc;
+                    }
+                    
+                    observer.unobserve(img);
+                }
+            });
+        }, {
+            rootMargin: '50px 0px',
+            threshold: 0.01
+        });
+    }
+}
+
+function observeLazyImages() {
+    if (lazyImageObserver) {
+        const lazyImages = document.querySelectorAll('img[data-src]');
+        lazyImages.forEach(img => lazyImageObserver.observe(img));
+    }
+}
 
 // Simple routing system
 function initRouting() {
@@ -264,14 +308,23 @@ function showCampingInSidebar(campingId) {
 
 function createSidebarContent(camping) {
     const photosHtml = camping.photos ? camping.photos.map((photo, index) => 
-        `<div class="photo-slide ${index === 0 ? 'active' : ''}" style="background-image: url('${photo}');"></div>`
+        `<div class="photo-slide ${index === 0 ? 'active' : ''}" style="background-color: #f0f0f0;">
+            <img ${index === 0 ? 'src' : 'data-src'}="${photo}" 
+                 alt="${camping.name}" 
+                 class="lazy-image ${index === 0 ? 'loaded' : ''}"
+                 style="width: 100%; height: 100%; object-fit: cover; transition: opacity 0.3s ease; ${index === 0 ? 'opacity: 1;' : 'opacity: 0;'}" />
+         </div>`
     ).join('') : '';
 
     const dotsHtml = camping.photos && camping.photos.length > 1 ? camping.photos.map((_, index) => 
         `<div class="slider-dot ${index === 0 ? 'active' : ''}" onclick="goToSlide(${camping.id}, ${index})"></div>`
     ).join('') : '';
 
-    return `
+    const featuresHtml = camping.features ? camping.features.map(feature => 
+        `<span class="feature-tag">${featureNames[feature] || feature}</span>`
+    ).join('') : '';
+
+    const content = `
         <div class="camping-header">
             <h2 class="camping-title">${camping.name}</h2>
             <div class="camping-address">📍 ${camping.address}</div>
@@ -307,6 +360,7 @@ function createSidebarContent(camping) {
             <span class="feature-tag">
                 ${woodAvailabilityNames[camping.woodAvailability]}
             </span>
+            ${featuresHtml}
         </div>
         
         <div class="camping-description">
@@ -343,6 +397,13 @@ function createSidebarContent(camping) {
             </button>
         </div>
     `;
+    
+    // Set up lazy loading after content is inserted
+    setTimeout(() => {
+        observeLazyImages();
+    }, 100);
+    
+    return content;
 }
 
 function closeSidebar() {

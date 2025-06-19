@@ -523,7 +523,10 @@ function filterCampings() {
     const selectedProvince = document.getElementById('provinceFilter').value;
     const selectedFeature = document.getElementById('featureFilter').value;
     const selectedWood = document.getElementById('woodFilter').value;
-    const selectedFireBan = document.getElementById('fireBanFilter').value;
+    
+    // Get selected features from checkboxes
+    const selectedFeatures = Array.from(document.querySelectorAll('.advanced-filters input[type="checkbox"]:checked'))
+        .map(checkbox => checkbox.value);
 
     filteredCampings = campings.filter(camping => {
         const matchesSearch = camping.name.toLowerCase().includes(searchTerm) ||
@@ -533,11 +536,11 @@ function filterCampings() {
         const matchesFeature = !selectedFeature || camping.fireType === selectedFeature;
         const matchesWood = !selectedWood || camping.woodAvailability === selectedWood;
         
-        const matchesFireBan = !selectedFireBan || 
-                             (selectedFireBan === 'allow' && !camping.fireBan) ||
-                             (selectedFireBan === 'ban' && camping.fireBan);
+        // Check if camping has all selected features
+        const matchesSelectedFeatures = selectedFeatures.length === 0 || 
+            selectedFeatures.every(feature => camping.features && camping.features.includes(feature));
 
-        return matchesSearch && matchesProvince && matchesFeature && matchesWood && matchesFireBan;
+        return matchesSearch && matchesProvince && matchesFeature && matchesWood && matchesSelectedFeatures;
     });
 
     updateMarkers();
@@ -548,6 +551,32 @@ function filterCampings() {
     if (currentCampingId && !filteredCampings.find(c => c.id === currentCampingId)) {
         closeSidebar();
     }
+}
+
+function toggleAdvancedFilters() {
+    const panel = document.getElementById('advancedFilters');
+    const button = document.querySelector('.filter-toggle-btn');
+    
+    panel.classList.toggle('open');
+    button.textContent = panel.classList.contains('open') ? '⚙️ Minder filters' : '⚙️ Meer filters';
+}
+
+function clearAllFilters() {
+    // Clear text input
+    document.getElementById('searchInput').value = '';
+    
+    // Clear select dropdowns
+    document.getElementById('provinceFilter').value = '';
+    document.getElementById('featureFilter').value = '';
+    document.getElementById('woodFilter').value = '';
+    
+    // Clear all checkboxes
+    document.querySelectorAll('.advanced-filters input[type="checkbox"]').forEach(checkbox => {
+        checkbox.checked = false;
+    });
+    
+    // Trigger filter update
+    filterCampings();
 }
 
 function updateStats() {
@@ -562,7 +591,6 @@ function initEventListeners() {
     document.getElementById('provinceFilter').addEventListener('change', filterCampings);
     document.getElementById('featureFilter').addEventListener('change', filterCampings);
     document.getElementById('woodFilter').addEventListener('change', filterCampings);
-    document.getElementById('fireBanFilter').addEventListener('change', filterCampings);
 
     // Form submission
     const addCampingForm = document.getElementById('addCampingForm');
@@ -631,3 +659,5 @@ window.goToSlide = goToSlide;
 window.getDirections = getDirections;
 window.shareCamping = shareCamping;
 window.focusOnCampingOnMap = focusOnCampingOnMap;
+window.toggleAdvancedFilters = toggleAdvancedFilters;
+window.clearAllFilters = clearAllFilters;

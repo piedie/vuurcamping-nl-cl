@@ -14,6 +14,7 @@ const campings = [
         description: "Prachtige natuurcamping aan de rand van de Hoge Veluwe. Vuurkorven toegestaan bij elke standplaats.",
         rating: 4.5,
         fireBan: false,
+        features: ["huisdieren-welkom", "kindvriendelijk", "met-stroom", "natuurgebied", "middel", "broodjes"],
         photos: [
             'https://images.unsplash.com/photo-1504851149312-7a075b496cc7?w=400&h=200&fit=crop',
             'https://images.unsplash.com/photo-1587061949409-02df41d5e562?w=400&h=200&fit=crop',
@@ -35,6 +36,7 @@ const campings = [
         description: "Kleinschalige camping met grote centrale vuurplaats. Gratis hout beschikbaar!",
         rating: 4.8,
         fireBan: true,
+        features: ["geen-huisdieren", "geen-kinderen", "zonder-stroom", "natuurgebied", "klein"],
         photos: [
             'https://images.unsplash.com/photo-1508873696983-2dfd5898f08b?w=400&h=200&fit=crop',
             'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=400&h=200&fit=crop'
@@ -55,6 +57,7 @@ const campings = [
         description: "Sfeercamping waar de eigenaar dagelijks een groot kampvuur maakt. Houtautomaat beschikbaar 24/7!",
         rating: 4.7,
         fireBan: false,
+        features: ["huisdieren-welkom", "kindvriendelijk", "met-stroom", "zonder-stroom", "natuurgebied", "middel", "broodjes"],
         photos: [
             'https://images.unsplash.com/photo-1537565266759-d30eaf487c2a?w=400&h=200&fit=crop',
             'https://images.unsplash.com/photo-1519904981063-b0cf448d479e?w=400&h=200&fit=crop',
@@ -76,6 +79,7 @@ const campings = [
         description: "Rustieke camping met verschillende vuuropties. Eigen hout meenemen verplicht - prachtige bosomgeving!",
         rating: 4.3,
         fireBan: false,
+        features: ["huisdieren-welkom", "geen-kinderen", "zonder-stroom", "natuurgebied", "klein"],
         photos: [
             'https://images.unsplash.com/photo-1502780402662-acc01917692e?w=400&h=200&fit=crop',
             'https://images.unsplash.com/photo-1551632811-561732d1e306?w=400&h=200&fit=crop'
@@ -96,6 +100,7 @@ const campings = [
         description: "Gezellige familiecamping waar je bij je eigen tent een vuurkorf mag plaatsen.",
         rating: 4.4,
         fireBan: false,
+        features: ["huisdieren-welkom", "kindvriendelijk", "met-stroom", "nabij-stad", "groot", "broodjes"],
         photos: [
             'https://images.unsplash.com/photo-1478131143081-80f7f84ca84d?w=400&h=200&fit=crop',
             'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=400&h=200&fit=crop'
@@ -116,6 +121,7 @@ const campings = [
         description: "Rustige boerderijcamping met authentieke sfeer. Grote vuurplaats midden op het terrein voor gezellige avonden.",
         rating: 4.6,
         fireBan: false,
+        features: ["huisdieren-welkom", "kindvriendelijk", "zonder-stroom", "natuurgebied", "klein", "broodjes"],
         photos: [
             'https://images.unsplash.com/photo-1486022662526-aa4d5c2c4421?w=400&h=200&fit=crop',
             'https://images.unsplash.com/photo-1605538883669-825200433431?w=400&h=200&fit=crop',
@@ -135,8 +141,8 @@ const campings = [
         fireType: "vuur-bij-tent",
         woodAvailability: "dag-nacht",
         description: "Direct aan het strand gelegen camping. Vuurkorven toegestaan op het strand bij laag water!",
-        rating: 4.9,
         fireBan: true,
+        features: ["huisdieren-welkom", "kindvriendelijk", "met-stroom", "zonder-stroom", "nabij-stad", "groot", "broodjes"],
         photos: [
             'https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=400&h=200&fit=crop',
             'https://images.unsplash.com/photo-1506197603052-3cc9c3a201bd?w=400&h=200&fit=crop'
@@ -157,6 +163,7 @@ const campings = [
         description: "Heuvelachtige camping in het hart van de Veluwe. Elke avond om 20:00 groot kampvuur met verhalen.",
         rating: 4.2,
         fireBan: false,
+        features: ["geen-huisdieren", "kindvriendelijk", "met-stroom", "natuurgebied", "middel"],
         photos: [
             'https://images.unsplash.com/photo-1504851149312-7a075b496cc7?w=400&h=200&fit=crop',
             'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=400&h=200&fit=crop',
@@ -178,6 +185,7 @@ const campings = [
         description: "Moderne camping in het nieuwe land. Vuurschalen beschikbaar bij receptie, BBQ altijd toegestaan.",
         rating: 4.1,
         fireBan: false,
+        features: ["huisdieren-welkom", "kindvriendelijk", "met-stroom", "nabij-stad", "groot", "broodjes"],
         photos: [
             'https://images.unsplash.com/photo-1508873696983-2dfd5898f08b?w=400&h=200&fit=crop',
             'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=200&fit=crop'
@@ -198,6 +206,7 @@ const campings = [
         description: "Kleinschalige camping met grote wei. Centrale vuurkuil waar iedereen welkom is. Gratis hout uit eigen bos.",
         rating: 4.5,
         fireBan: false,
+        features: ["huisdieren-welkom", "kindvriendelijk", "zonder-stroom", "natuurgebied", "klein"],
         photos: [
             'https://images.unsplash.com/photo-1537565266759-d30eaf487c2a?w=400&h=200&fit=crop',
             'https://images.unsplash.com/photo-1519904981063-b0cf448d479e?w=400&h=200&fit=crop'
@@ -218,6 +227,7 @@ const campings = [
         description: "Duincamping op 300m van het strand. Vuurkorven toegestaan, automaat met aanmaakhout 24/7 beschikbaar.",
         rating: 4.7,
         fireBan: false,
+        features: ["geen-huisdieren", "kindvriendelijk", "met-stroom", "nabij-stad", "middel", "broodjes"],
         photos: [
             'https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=400&h=200&fit=crop',
             'https://images.unsplash.com/photo-1478131143081-80f7f84ca84d?w=400&h=200&fit=crop',
@@ -239,6 +249,7 @@ const campings = [
         description: "Camping aan de Maas met dagelijks barbecue en kampvuur. Eigen hout meenemen, prachtige rivier locatie.",
         rating: 4.0,
         fireBan: true,
+        features: ["huisdieren-welkom", "geen-kinderen", "met-stroom", "nabij-stad", "middel"],
         photos: [
             'https://images.unsplash.com/photo-1502780402662-acc01917692e?w=400&h=200&fit=crop',
             'https://images.unsplash.com/photo-1551632811-561732d1e306?w=400&h=200&fit=crop'
@@ -259,6 +270,7 @@ const campings = [
         description: "Midden in de paarse heide. Verschillende vuurplaatsen verspreid over terrein. Heide-hout gratis beschikbaar.",
         rating: 4.4,
         fireBan: false,
+        features: ["huisdieren-welkom", "kindvriendelijk", "zonder-stroom", "natuurgebied", "middel"],
         photos: [
             'https://images.unsplash.com/photo-1486022662526-aa4d5c2c4421?w=400&h=200&fit=crop',
             'https://images.unsplash.com/photo-1605538883669-825200433431?w=400&h=200&fit=crop'
@@ -279,6 +291,7 @@ const campings = [
         description: "Unieke locatie aan het Wad. Grote vuurplaats met uitzicht over het water. Hout verkrijgbaar tot 18:00.",
         rating: 4.3,
         fireBan: false,
+        features: ["geen-huisdieren", "geen-kinderen", "zonder-stroom", "natuurgebied", "klein"],
         photos: [
             'https://images.unsplash.com/photo-1564415315949-7a0c4c73aeca?w=400&h=200&fit=crop',
             'https://images.unsplash.com/photo-1516426122078-c23e76319801?w=400&h=200&fit=crop'
@@ -299,6 +312,7 @@ const campings = [
         description: "Authentieke boerderijcamping met eigen bos. Vuurkorven bij elke plek, houtkloofmachine beschikbaar.",
         rating: 4.6,
         fireBan: false,
+        features: ["huisdieren-welkom", "kindvriendelijk", "met-stroom", "zonder-stroom", "nabij-stad", "groot", "broodjes"],
         photos: [
             'https://images.unsplash.com/photo-1537565266759-d30eaf487c2a?w=400&h=200&fit=crop',
             'https://images.unsplash.com/photo-1519904981063-b0cf448d479e?w=400&h=200&fit=crop',
@@ -319,4 +333,19 @@ const woodAvailabilityNames = {
     'bepaalde-tijden': '🪵 Hout op bepaalde tijden verkrijgbaar',
     'gratis': '🪵 Gratis hout beschikbaar',
     'geen': '❌ Geen hout verkrijgbaar'
+};
+
+const featureNames = {
+    'huisdieren-welkom': '🐕 Huisdieren welkom',
+    'geen-huisdieren': '🚫 Geen huisdieren',
+    'kindvriendelijk': '👨‍👩‍👧‍👦 Kindvriendelijk',
+    'geen-kinderen': '🔞 Geen kinderen',
+    'met-stroom': '⚡ Plekken met stroom',
+    'zonder-stroom': '🌿 Plekken zonder stroom',
+    'natuurgebied': '🏞️ In natuurgebied',
+    'nabij-stad': '🏙️ Nabij stad',
+    'klein': '🏕️ Minder dan 25 plaatsen',
+    'middel': '🏕️ 25-50 plaatsen',
+    'groot': '🏕️ Meer dan 50 plaatsen',
+    'broodjes': '🥖 Broodjes verkrijgbaar'
 };
